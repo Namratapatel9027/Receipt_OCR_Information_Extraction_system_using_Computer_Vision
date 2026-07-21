@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              338,
+              337
+            ],
+            [
+              628,
+              337
+            ],
+            [
+              628,
+              354
+            ],
+            [
+              338,
+              354
+            ],
+            [
+              338,
+              337
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "company",
+        "classification": {
+          "name": "company",
+          "colorRGB": -65536
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              430,
+              353
+            ],
+            [
+              536,
+              353
+            ],
+            [
+              536,
+              367
+            ],
+            [
+              430,
+              367
+            ],
+            [
+              430,
+              353
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "date",
+        "classification": {
+          "name": "date",
+          "colorRGB": -16711936
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              358,
+              389
+            ],
+            [
+              607,
+              389
+            ],
+            [
+              607,
+              425
+            ],
+            [
+              358,
+              425
+            ],
+            [
+              358,
+              389
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              171,
+              691
+            ],
+            [
+              549,
+              691
+            ],
+            [
+              549,
+              738
+            ],
+            [
+              171,
+              738
+            ],
+            [
+              171,
+              691
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "date",
+        "classification": {
+          "name": "date",
+          "colorRGB": -16711936
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              115,
+              349
+            ],
+            [
+              707,
+              349
+            ],
+            [
+              707,
+              479
+            ],
+            [
+              115,
+              479
+            ],
+            [
+              115,
+              349
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              613,
+              1201
+            ],
+            [
+              759,
+              1201
+            ],
+            [
+              759,
+              1365
+            ],
+            [
+              613,
+              1365
+            ],
+            [
+              613,
+              1201
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}

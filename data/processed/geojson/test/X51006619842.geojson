@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              149,
+              105
+            ],
+            [
+              695,
+              105
+            ],
+            [
+              695,
+              146
+            ],
+            [
+              149,
+              146
+            ],
+            [
+              149,
+              105
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "company",
+        "classification": {
+          "name": "company",
+          "colorRGB": -65536
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              181,
+              153
+            ],
+            [
+              670,
+              153
+            ],
+            [
+              670,
+              299
+            ],
+            [
+              181,
+              299
+            ],
+            [
+              181,
+              153
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              713,
+              860
+            ],
+            [
+              812,
+              860
+            ],
+            [
+              812,
+              895
+            ],
+            [
+              713,
+              895
+            ],
+            [
+              713,
+              860
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}

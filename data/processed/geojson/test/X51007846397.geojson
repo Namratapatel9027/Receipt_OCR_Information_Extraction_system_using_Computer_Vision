@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2129,
+              2102
+            ],
+            [
+              2623,
+              2102
+            ],
+            [
+              2623,
+              2172
+            ],
+            [
+              2129,
+              2172
+            ],
+            [
+              2129,
+              2102
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "date",
+        "classification": {
+          "name": "date",
+          "colorRGB": -16711936
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              1801,
+              2267
+            ],
+            [
+              2947,
+              2267
+            ],
+            [
+              2947,
+              2429
+            ],
+            [
+              1801,
+              2429
+            ],
+            [
+              1801,
+              2267
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2585,
+              3433
+            ],
+            [
+              3073,
+              3433
+            ],
+            [
+              3073,
+              3710
+            ],
+            [
+              2585,
+              3710
+            ],
+            [
+              2585,
+              3433
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}

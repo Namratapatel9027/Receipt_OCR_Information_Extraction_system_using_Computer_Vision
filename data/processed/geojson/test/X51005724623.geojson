@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              597,
+              909
+            ],
+            [
+              873,
+              909
+            ],
+            [
+              873,
+              943
+            ],
+            [
+              597,
+              943
+            ],
+            [
+              597,
+              909
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "date",
+        "classification": {
+          "name": "date",
+          "colorRGB": -16711936
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              774,
+              34
+            ],
+            [
+              817,
+              34
+            ],
+            [
+              817,
+              83
+            ],
+            [
+              774,
+              83
+            ],
+            [
+              774,
+              34
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              289,
+              1253
+            ],
+            [
+              787,
+              1253
+            ],
+            [
+              787,
+              1385
+            ],
+            [
+              289,
+              1385
+            ],
+            [
+              289,
+              1253
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}

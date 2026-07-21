@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2262,
+              1723
+            ],
+            [
+              2885,
+              1723
+            ],
+            [
+              2885,
+              1802
+            ],
+            [
+              2262,
+              1802
+            ],
+            [
+              2262,
+              1723
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "company",
+        "classification": {
+          "name": "company",
+          "colorRGB": -65536
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2259,
+              1842
+            ],
+            [
+              3293,
+              1842
+            ],
+            [
+              3293,
+              2007
+            ],
+            [
+              2259,
+              2007
+            ],
+            [
+              2259,
+              1842
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3056,
+              2553
+            ],
+            [
+              3320,
+              2553
+            ],
+            [
+              3320,
+              2977
+            ],
+            [
+              3056,
+              2977
+            ],
+            [
+              3056,
+              2553
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              483,
+              835
+            ],
+            [
+              505,
+              835
+            ],
+            [
+              505,
+              1171
+            ],
+            [
+              483,
+              1171
+            ],
+            [
+              483,
+              835
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "company",
+        "classification": {
+          "name": "company",
+          "colorRGB": -65536
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              142,
+              832
+            ],
+            [
+              158,
+              832
+            ],
+            [
+              158,
+              1167
+            ],
+            [
+              142,
+              1167
+            ],
+            [
+              142,
+              832
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "date",
+        "classification": {
+          "name": "date",
+          "colorRGB": -16711936
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              142,
+              832
+            ],
+            [
+              505,
+              832
+            ],
+            [
+              505,
+              1171
+            ],
+            [
+              142,
+              1171
+            ],
+            [
+              142,
+              832
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              539,
+              1252
+            ],
+            [
+              699,
+              1252
+            ],
+            [
+              699,
+              1360
+            ],
+            [
+              539,
+              1360
+            ],
+            [
+              539,
+              1252
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}

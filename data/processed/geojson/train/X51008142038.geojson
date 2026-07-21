@@ -1,0 +1,116 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              178,
+              347
+            ],
+            [
+              673,
+              347
+            ],
+            [
+              673,
+              388
+            ],
+            [
+              178,
+              388
+            ],
+            [
+              178,
+              347
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "company",
+        "classification": {
+          "name": "company",
+          "colorRGB": -65536
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              198,
+              393
+            ],
+            [
+              672,
+              393
+            ],
+            [
+              672,
+              581
+            ],
+            [
+              198,
+              581
+            ],
+            [
+              198,
+              393
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "address",
+        "classification": {
+          "name": "address",
+          "colorRGB": -16776961
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              679,
+              1091
+            ],
+            [
+              769,
+              1091
+            ],
+            [
+              769,
+              1127
+            ],
+            [
+              679,
+              1127
+            ],
+            [
+              679,
+              1091
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "total",
+        "classification": {
+          "name": "total",
+          "colorRGB": -256
+        }
+      }
+    }
+  ]
+}
