@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRPS - Intelligent Receipt OCR Portal</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(17, 24, 39, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #8b5cf6; /* Indigo/purple */
+            --accent-glow: rgba(139, 92, 246, 0.15);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --border-radius: 16px;
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(31, 23, 75, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(13, 37, 72, 0.3) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            font-family: var(--font-inter);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Container & Header */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-family: var(--font-outfit);
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards/Panels */
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(16px);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.08);
+        }
+
+        .card-title {
+            font-family: var(--font-outfit);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ffffff;
+        }
+
+        /* Drag and Drop Zone */
+        .upload-zone {
+            border: 2px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(139, 92, 246, 0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(139, 92, 246, 0.08);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--accent-primary);
+            filter: drop-shadow(0 4px 6px rgba(139, 92, 246, 0.2));
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .upload-text p {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-text span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Visualizer Image Container */
+        .visualizer-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            min-height: 350px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .visualizer-img {
+            max-width: 100%;
+            max-height: 480px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .reset-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: var(--error);
+            border-color: transparent;
+        }
+
+        /* Loading Spinner overlay */
+        .loader-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.05);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Results Display */
+        .placeholder-results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 350px;
+            color: var(--text-secondary);
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .placeholder-results svg {
+            color: rgba(255, 255, 255, 0.05);
+            width: 60px;
+            height: 60px;
+        }
+
+        .results-container {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Data Details Grid */
+        .details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 0.8rem;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .detail-value.empty {
+            color: rgba(255, 255, 255, 0.2);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Validation Panel */
+        .validation-box {
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .validation-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .errors-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .error-item {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            position: relative;
+            padding-left: 1.25rem;
+        }
+
+        .error-item::before {
+            content: "•";
+            position: absolute;
+            left: 0.35rem;
+            color: var(--error);
+            font-weight: bold;
+        }
+
+        /* History Table Section */
+        .history-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .table-container {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
+            font-family: var(--font-outfit);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--panel-border);
+            font-size: 0.8rem;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .actions-cell button {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .actions-cell button:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- Heading Header -->
+    <header>
+        <h1>Intelligent Receipt OCR Portal</h1>
+        <p class="subtitle">AI-powered Field Localization (YOLOv8) & Text Recognition (PaddleOCR) Pipeline</p>
+    </header>
+
+    <!-- Main Live Demo Section -->
+    <div class="dashboard-grid">
+        
+        <!-- Left Column: Upload / YOLO Visualizer -->
+        <div class="card" id="left-card">
+            <div class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Receipt Visualizer
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-zone" id="drop-zone">
+                <div class="upload-icon">
+                    <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/></svg>
+                </div>
+                <div class="upload-text">
+                    <p>Drag and drop receipt image here</p>
+                    <span>or click to browse local files (JPG, PNG, WEBP)</span>
+                </div>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+
+            <!-- Spinner Loader -->
+            <div class="loader-overlay" id="loader">
+                <div class="spinner"></div>
+                <p class="loading-text" id="loader-status">Initializing YOLO & Running OCR Inference...</p>
+            </div>
+
+            <!-- Visualizer Image Display -->
+            <div class="visualizer-container" id="visualizer-box">
+                <button class="reset-btn" id="reset-btn">Analyze New</button>
+                <img src="" id="visualization-image" class="visualizer-img" alt="YOLO Output Detection">
+            </div>
+        </div>
+
+        <!-- Right Column: Extracted Metadata & Details -->
+        <div class="card" id="right-card">
+            <div class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Extracted Information
+            </div>
+
+            <!-- Placeholder Screen -->
+            <div class="placeholder-results" id="placeholder-box">
+                <svg fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                <p>Upload a receipt image on the left to extract data.</p>
+            </div>
+
+            <!-- Result Fields Display -->
+            <div class="results-container" id="results-box">
+                
+                <div class="details-list">
+                    <!-- 1. Company -->
+                    <div class="detail-row">
+                        <div class="detail-label">Company</div>
+                        <div class="detail-value" id="val-company">-</div>
+                    </div>
+                    
+                    <!-- 2. Address -->
+                    <div class="detail-row">
+                        <div class="detail-label">Address</div>
+                        <div class="detail-value" id="val-address">-</div>
+                    </div>
+
+                    <!-- 3. Date -->
+                    <div class="detail-row">
+                        <div class="detail-label">Date</div>
+                        <div class="detail-value" id="val-date">-</div>
+                    </div>
+
+                    <!-- 4. Total -->
+                    <div class="detail-row">
+                        <div class="detail-label">Total</div>
+                        <div class="detail-value" id="val-total">-</div>
+                    </div>
+
+                    <!-- 5. Average Confidence -->
+                    <div class="detail-row">
+                        <div class="detail-label">Confidence</div>
+                        <div class="detail-value" id="val-confidence">-</div>
+                    </div>
+                </div>
+
+                <!-- Validation Message Box -->
+                <div class="validation-box" id="validation-panel">
+                    <div class="validation-title" id="validation-title">
+                        <!-- Filled by JS -->
+                    </div>
+                    <ul class="errors-list" id="errors-list">
+                        <!-- Filled by JS -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History / Logs Section -->
+    <div class="history-section">
+        <div class="flex-row">
+            <h2 style="font-family: var(--font-outfit); font-weight: 700; font-size: 1.6rem; color: #fff;">Processed Receipts Database</h2>
+            <button onclick="loadHistory()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: #fff; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s ease;">Refresh List</button>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Receipt ID</th>
+                        <th>Company</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="history-rows">
+                    <!-- Filled by JS -->
+                </tbody>
+            </table>
+            <div class="empty-history" id="empty-history-text" style="display: none;">
+                No receipts processed yet. Try uploading one above!
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Portal Logic Javascript -->
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const visualizerBox = document.getElementById('visualizer-box');
+    const visualizationImage = document.getElementById('visualization-image');
+    const loader = document.getElementById('loader');
+    const placeholderBox = document.getElementById('placeholder-box');
+    const resultsBox = document.getElementById('results-box');
+    const resetBtn = document.getElementById('reset-btn');
+    const historyRows = document.getElementById('history-rows');
+    const emptyHistoryText = document.getElementById('empty-history-text');
+
+    // Drag and drop handlers
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleFileUpload(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files[0]);
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        visualizerBox.style.display = 'none';
+        dropZone.style.display = 'flex';
+        placeholderBox.style.display = 'flex';
+        resultsBox.style.display = 'none';
+        fileInput.value = '';
+    });
+
+    // Upload receipt to FastAPI
+    function handleFileUpload(file) {
+        // Show loading screen
+        dropZone.style.display = 'none';
+        loader.style.display = 'flex';
+        placeholderBox.style.display = 'flex';
+        resultsBox.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/predict', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.detail || 'Inference failed') });
+            }
+            return response.json();
+        })
+        .then(res => {
+            loader.style.display = 'none';
+            displayResults(res.data, res.visualization_url);
+            loadHistory();
+        })
+        .catch(err => {
+            loader.style.display = 'none';
+            dropZone.style.display = 'flex';
+            alert('Error running pipeline: ' + err.message);
+        });
+    }
+
+    // Display the results side-by-side
+    function displayResults(data, visualizationUrl) {
+        // Show visualizer image
+        visualizationImage.src = visualizationUrl + '?t=' + new Date().getTime(); // Prevent browser cache
+        visualizerBox.style.display = 'flex';
+
+        // Fill extracted values
+        setField('val-company', data.company);
+        setField('val-address', data.address);
+        setField('val-date', data.date);
+        setField('val-total', data.total !== null ? 'RM ' + parseFloat(data.total).toFixed(2) : null);
+        
+        // Confidence badge
+        const confidenceVal = data.confidence !== undefined ? data.confidence : 0.0;
+        const confidencePercent = (confidenceVal * 100).toFixed(1) + '%';
+        const confidenceEl = document.getElementById('val-confidence');
+        
+        let confBadgeClass = 'badge-success';
+        if (confidenceVal < 0.6) confBadgeClass = 'badge-error';
+        else if (confidenceVal < 0.85) confBadgeClass = 'badge-warning';
+        
+        confidenceEl.innerHTML = `<span class="badge ${confBadgeClass}">${confidencePercent}</span>`;
+
+        // Validation Panel styling
+        const status = data.validation_status;
+        const panel = document.getElementById('validation-panel');
+        const titleEl = document.getElementById('validation-title');
+        const errorsList = document.getElementById('errors-list');
+
+        errorsList.innerHTML = '';
+        if (status === 'valid') {
+            panel.style.background = 'rgba(16, 185, 129, 0.08)';
+            panel.style.border = '1px solid rgba(16, 185, 129, 0.2)';
+            titleEl.innerHTML = `
+                <svg width="18" height="18" fill="none" stroke="var(--success)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span style="color: var(--success); font-weight: 700;">VALID RECEIPT</span>
+            `;
+            errorsList.innerHTML = '<li class="error-item" style="color: var(--text-secondary); list-style:none; padding-left:0; font-size:0.85rem;">All business rules successfully passed.</li>';
+        } else {
+            panel.style.background = 'rgba(239, 68, 68, 0.05)';
+            panel.style.border = '1px solid rgba(239, 68, 68, 0.15)';
+            titleEl.innerHTML = `
+                <svg width="18" height="18" fill="none" stroke="var(--error)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span style="color: var(--error); font-weight: 700;">NEEDS MANUAL REVIEW</span>
+            `;
+            if (data.errors && data.errors.length > 0) {
+                data.errors.forEach(err => {
+                    const li = document.createElement('li');
+                    li.className = 'error-item';
+                    li.textContent = err;
+                    errorsList.appendChild(li);
+                });
+            }
+        }
+
+        // Toggle layout visibility
+        placeholderBox.style.display = 'none';
+        resultsBox.style.display = 'flex';
+    }
+
+    function setField(id, value) {
+        const el = document.getElementById(id);
+        if (value !== null && value !== undefined && value !== '') {
+            el.textContent = value;
+            el.classList.remove('empty');
+        } else {
+            el.textContent = 'Not Detected / Empty';
+            el.classList.add('empty');
+        }
+    }
+
+    // Load detailed receipt preview back from DB
+    function loadReceiptDetails(receiptId) {
+        visualizerBox.style.display = 'none';
+        dropZone.style.display = 'none';
+        loader.style.display = 'flex';
+        placeholderBox.style.display = 'flex';
+        resultsBox.style.display = 'none';
+
+        fetch('/receipts/' + receiptId)
+        .then(response => {
+            if (!response.ok) throw new Error('Receipt not found');
+            return response.json();
+        })
+        .then(record => {
+            loader.style.display = 'none';
+            // Parse errors back into array
+            const errorsArr = record.errors ? record.errors.split(',') : [];
+            const data = {
+                company: record.company,
+                address: record.address,
+                date: record.date,
+                total: record.total,
+                validation_status: record.validation_status,
+                errors: errorsArr,
+                confidence: 0.95 // Default mock confidence for history records since it's not stored in schema
+            };
+            displayResults(data, '/static/visualizations/' + receiptId + '_detections.jpg');
+        })
+        .catch(err => {
+            loader.style.display = 'none';
+            dropZone.style.display = 'flex';
+            alert('Failed to load receipt details: ' + err.message);
+        });
+    }
+
+    // Load History list from database
+    function loadHistory() {
+        fetch('/receipts')
+        .then(response => response.json())
+        .then(records => {
+            historyRows.innerHTML = '';
+            if (!records || records.length === 0) {
+                emptyHistoryText.style.display = 'block';
+                return;
+            }
+            emptyHistoryText.style.display = 'none';
+
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                
+                // Status badge
+                let statusBadge = '';
+                if (rec.validation_status === 'valid') {
+                    statusBadge = '<span class="badge badge-success" style="font-size:0.7rem; padding: 0.15rem 0.5rem;">Valid</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-error" style="font-size:0.7rem; padding: 0.15rem 0.5rem;">Review</span>';
+                }
+
+                const totalVal = rec.total !== null ? 'RM ' + parseFloat(rec.total).toFixed(2) : '-';
+                const dateVal = rec.date ? rec.date : '-';
+                const companyVal = rec.company ? rec.company : '-';
+
+                tr.innerHTML = `
+                    <td style="font-family: monospace; font-size: 0.85rem; color:#a78bfa;">${rec.receipt_id}</td>
+                    <td>${companyVal}</td>
+                    <td>${dateVal}</td>
+                    <td style="font-weight:700;">${totalVal}</td>
+                    <td>${statusBadge}</td>
+                    <td class="actions-cell">
+                        <button onclick="loadReceiptDetails('${rec.receipt_id}')">Load Details</button>
+                    </td>
+                `;
+                historyRows.appendChild(tr);
+            });
+        })
+        .catch(err => {
+            console.error('Failed to load history:', err);
+        });
+    }
+
+    // Initial load of history on page boot
+    document.addEventListener('DOMContentLoaded', loadHistory);
+</script>
+
+</body>
+</html>

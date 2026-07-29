@@ -1,11 +1,15 @@
+import dataclasses
+import json
 import os
 import shutil
 import sys
 from pathlib import Path
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-# Ensure the root project directory is in the Python path so we can import scripts
+# Ensure the root project directory is in the Python path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
@@ -15,24 +19,38 @@ from scripts.main_inference_8 import (
     BusinessRulesConfig,
     InferenceConfig,
     OcrConfig,
+    OcrFieldResult,
     ReceiptDetector,
     ReceiptOcrProcessor,
     ReceiptValidator,
-    process_single_image,
+    save_visualization,
 )
 
 # Create the SQLite database tables on startup if they don't exist
 models.Base.metadata.create_all(bind=engine)
 
-# Define file storage paths
+# Define directories
 UPLOADS_DIR = PROJECT_ROOT / "data" / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Initialize the FastAPI App
+VISUALIZATION_DIR = PROJECT_ROOT / "outputs" / "yolo_visualization"
+VISUALIZATION_DIR.mkdir(parents=True, exist_ok=True)
+
+JSON_DIR = PROJECT_ROOT / "outputs" / "ocr_final_json"
+JSON_DIR.mkdir(parents=True, exist_ok=True)
+
+# Initialize FastAPI
 app = FastAPI(
-    title="Intelligent Receipt Processing System (IRPS) API",
-    description="Backend API for YOLOv8 Field Localization and PaddleOCR Text Extraction",
+    title="IRPS API & Portal",
+    description="Backend API and Web Portal for Intelligent Receipt Processing System",
     version="1.0.0",
+)
+
+# Serve the visualizer images publicly so the frontend can load them
+app.mount(
+    "/static/visualizations",
+    StaticFiles(directory=str(VISUALIZATION_DIR)),
+    name="visualizations",
 )
 
 # ----------------------------------------------------------------------
@@ -41,7 +59,6 @@ app = FastAPI(
 MODEL_PATH = PROJECT_ROOT / "models" / "best.pt"
 print(f"Loading YOLO model from: {MODEL_PATH}...")
 
-# Load models globally so they don't reload on each request (which would be very slow)
 detector = ReceiptDetector(
     InferenceConfig(model_path=MODEL_PATH, device="cpu", verbose=False)
 )
@@ -52,23 +69,26 @@ print("Models loaded successfully! Server is ready.")
 
 
 # ----------------------------------------------------------------------
-# API Endpoints
+# API Routes
 # ----------------------------------------------------------------------
 
 
-@app.get("/")
-def read_root():
-    """Welcome endpoint confirming server status."""
-    return {
-        "status": "online",
-        "message": "Welcome to the IRPS API. Go to /docs for the swagger documentation.",
-    }
+@app.get("/", response_class=HTMLResponse)
+def serve_portal():
+    """Serve the premium frontend landing page."""
+    template_path = PROJECT_ROOT / "app" / "templates" / "index.html"
+    if not template_path.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="Portal template file index.html not found.",
+        )
+    with template_path.open("r", encoding="utf-8") as f:
+        return f.read()
 
 
 @app.post("/predict")
 def predict_receipt(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    """Upload a receipt image, run YOLO and PaddleOCR extraction, save to SQLite, and return JSON."""
-    # 1. Validate file extension
+    """Upload receipt, run YOLO + OCR, persist in database, and return JSON."""
     file_suffix = Path(file.filename).suffix.lower()
     if file_suffix not in {".jpg", ".jpeg", ".png", ".webp"}:
         raise HTTPException(
@@ -76,7 +96,7 @@ def predict_receipt(file: UploadFile = File(...), db: Session = Depends(get_db))
             detail=f"Unsupported file type '{file_suffix}'. Please upload a JPG, PNG, or WEBP image.",
         )
 
-    # 2. Save the uploaded file locally to data/uploads/
+    # 1. Save uploaded file
     local_image_path = UPLOADS_DIR / file.filename
     try:
         with local_image_path.open("wb") as buffer:
@@ -86,34 +106,78 @@ def predict_receipt(file: UploadFile = File(...), db: Session = Depends(get_db))
             status_code=500, detail=f"Failed to save uploaded file: {error}"
         )
 
-    # 3. Run the ML inference pipeline in-memory
+    # 2. Run local ML pipeline steps manually to extract confidence scores
     try:
-        payload = process_single_image(
-            image_path=local_image_path,
-            detector=detector,
-            ocr_processor=ocr_processor,
-            validator=validator,
-            save_vis=True,
-            visualization_dir=PROJECT_ROOT / "outputs" / "yolo_visualization",
-            json_dir=PROJECT_ROOT / "outputs" / "ocr_final_json",
+        # Run YOLO
+        image_path, image, detections = detector.predict(local_image_path)
+        receipt_id = local_image_path.stem
+
+        # Save visualization with boxes
+        save_visualization(image, receipt_id, detections, output_dir=VISUALIZATION_DIR)
+
+        # Crop and OCR in-memory
+        detection_by_class = {det.class_name: det for det in detections}
+        ocr_results = []
+        for field in ["company", "date", "address", "total"]:
+            if field not in detection_by_class:
+                ocr_results.append(
+                    OcrFieldResult(
+                        field=field,
+                        text=None,
+                        confidence=None,
+                        status="not_detected",
+                        sharpness=None,
+                        variant=None,
+                        reason="detection_crop_missing",
+                    )
+                )
+            else:
+                det = detection_by_class[field]
+                crop_image = image[det.ymin : det.ymax, det.xmin : det.xmax]
+                ocr_results.append(
+                    ocr_processor.process_crop_in_memory(field, crop_image)
+                )
+
+        # Build OCR payload for validation
+        ocr_payload = {
+            "receipt_id": receipt_id,
+            "fields": [dataclasses.asdict(res) for res in ocr_results],
+        }
+
+        # Validate
+        validation_result = validator.validate_receipt(ocr_payload)
+        payload = dataclasses.asdict(validation_result)
+
+        # Calculate average confidence of successfully read OCR fields
+        conf_scores = [
+            res.confidence for res in ocr_results if res.confidence is not None
+        ]
+        avg_confidence = (
+            sum(conf_scores) / len(conf_scores) if conf_scores else 0.0
         )
+        payload["confidence"] = round(avg_confidence, 4)
+
+        # Save final OCR JSON to disk
+        dest_path = JSON_DIR / f"{receipt_id}.json"
+        with open(dest_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+            f.write("\n")
+
     except Exception as error:
         raise HTTPException(
             status_code=500, detail=f"Inference pipeline failed: {error}"
         )
 
-    # 4. Check if a record with the same receipt_id already exists in the database
-    receipt_id = payload["receipt_id"]
+    # 3. Write database record
+    errors_string = ",".join(payload["errors"]) if payload["errors"] else ""
     existing_record = (
         db.query(models.Receipt)
         .filter(models.Receipt.receipt_id == receipt_id)
         .first()
     )
 
-    errors_string = ",".join(payload["errors"]) if payload["errors"] else ""
-
     if existing_record:
-        # Update existing record
+        # Update existing
         existing_record.company = payload["company"]
         existing_record.date = payload["date"]
         existing_record.address = payload["address"]
@@ -124,7 +188,7 @@ def predict_receipt(file: UploadFile = File(...), db: Session = Depends(get_db))
         db.refresh(existing_record)
         db_receipt = existing_record
     else:
-        # Create new database record
+        # Insert new
         db_receipt = models.Receipt(
             receipt_id=receipt_id,
             company=payload["company"],
@@ -138,18 +202,18 @@ def predict_receipt(file: UploadFile = File(...), db: Session = Depends(get_db))
         db.commit()
         db.refresh(db_receipt)
 
-    # 5. Return the extracted and validated receipt data
     return {
         "message": "Processing completed successfully.",
         "db_record_id": db_receipt.id,
         "data": payload,
+        "visualization_url": f"/static/visualizations/{receipt_id}_detections.jpg",
     }
 
 
 @app.get("/receipts")
 def list_receipts(db: Session = Depends(get_db)):
-    """Fetch all processed receipts currently stored in the SQLite database."""
-    receipts = db.query(models.Receipt).all()
+    """Fetch all processed receipts currently stored in SQLite."""
+    receipts = db.query(models.Receipt).order_by(models.Receipt.id.desc()).all()
     return receipts
 
 
