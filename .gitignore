@@ -1,29 +1,24 @@
-# Python
+# Python bytecode
 __pycache__/
-*.py[cod]
-*.so
+*.pyc
+*.pyo
+*.pyd
 
-# Virtual Environment
-venv/
-.env
-.env.*
+# Local SQLite database
+receipts.db
+receipts.db-journal
 
-# Conda
-.conda/
+# ML Models and weights
+models/
+*.pt
+*.onnx
 
-# IDE
-.vscode/
-.idea/
+# Data and user uploads
+data/processed/
+data/raw.zip
+data/uploads/
 
-# Jupyter
-.ipynb_checkpoints/
-
-# Logs
-logs/
-*.log
-
-# OS Files
-.DS_Store
-Thumbs.db
-
-data/raw/
+# Output directories
+outputs/
+ocr_final_json/
+yolo_visualization/
