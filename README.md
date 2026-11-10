@@ -54,7 +54,7 @@ The final output is a structured JSON response.
 
 ## 2. System Architecture
 
-![Receipt OCR System Architecture](docs/images/receipt-ocr-architecture.png)
+![Receipt OCR System Architecture](irps_architecture.png)
 
 > Replace `docs/images/receipt-ocr-architecture.png` with your generated architecture image when ready.
 
